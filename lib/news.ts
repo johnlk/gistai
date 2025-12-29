@@ -73,6 +73,7 @@ async function getCachedNews(): Promise<CachedNews> {
   // Check if in-memory cache exists and is still valid
   if (newsCache && now - cacheTimestamp < CACHE_DURATION) {
     console.log("[cache] Using in-memory cached news content")
+
     return newsCache
   }
 
@@ -85,6 +86,7 @@ async function getCachedNews(): Promise<CachedNews> {
       console.log("[cache] Using blob storage news content")
       newsCache = blobData
       cacheTimestamp = now
+
       return newsCache
     }
   }
@@ -98,6 +100,7 @@ async function getCachedNews(): Promise<CachedNews> {
       lastUpdated: new Date().toISOString(),
     }
     cacheTimestamp = now
+
     return newsCache
   }
 
