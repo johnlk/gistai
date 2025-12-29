@@ -13,6 +13,7 @@ export async function POST() {
     const { url } = await put("articles/news-data.json", JSON.stringify(newsData, null, 2), {
       access: "public",
       contentType: "application/json",
+      allowOverwrite: true,
     })
 
     console.log("[api] Successfully updated news data in blob storage:", url)
