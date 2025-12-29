@@ -35,6 +35,12 @@ async function generateNewsContent(): Promise<CachedNews> {
 }
 
 async function loadNewsFromBlob(): Promise<CachedNews | null> {
+  // Skip blob storage if token is not available (e.g., during build in CI/CD)
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.log("[blob] Skipping blob storage (no token available)")
+    return null
+  }
+
   try {
     const { blobs } = await list({ prefix: "articles/news-data.json" })
 
@@ -81,6 +87,18 @@ async function getCachedNews(): Promise<CachedNews> {
       cacheTimestamp = now
       return newsCache
     }
+  }
+
+  // If we don't have XAI_API_KEY (e.g., during build), return empty placeholder
+  if (!process.env.XAI_API_KEY) {
+    console.log("[cache] No API keys available, returning placeholder data")
+    newsCache = {
+      headlines: [],
+      articles: {},
+      lastUpdated: new Date().toISOString(),
+    }
+    cacheTimestamp = now
+    return newsCache
   }
 
   // Generate new content if no valid data found
