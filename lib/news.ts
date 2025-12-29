@@ -24,7 +24,7 @@ let cacheTimestamp = 0
 const CACHE_DURATION = 3600 * 1000 // 1 hour in milliseconds
 
 async function generateNewsContent(): Promise<CachedNews> {
-  const useXAI = !!process.env.XAI_API_KEY
+  const useXAI = process.env.XAI_API_KEY
 
   if (!useXAI) {
     throw new Error('No XAI_API_KEY set')
@@ -53,7 +53,7 @@ async function loadNewsFromBlob(): Promise<CachedNews | null> {
 
     const data = await response.json()
     console.log("[blob] Successfully loaded news data from blob storage")
-    
+
     return data
   } catch (error) {
     console.error("[blob] Error loading news from blob storage:", error)
