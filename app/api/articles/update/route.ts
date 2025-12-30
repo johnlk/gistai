@@ -2,7 +2,18 @@ import { put } from "@vercel/blob"
 import { NextResponse } from "next/server"
 import { generateNewsWithXAI } from "@/lib/xai"
 
-export async function POST() {
+export async function POST(request: Request) {
+  // Validate API key
+  const authHeader = request.headers.get("authorization")
+  const apiKey = authHeader?.replace("Bearer ", "")
+
+  if (!apiKey || apiKey !== process.env.API_SECRET_KEY) {
+    return NextResponse.json(
+      { error: "Unauthorized - Invalid or missing API key" },
+      { status: 401 }
+    )
+  }
+
   try {
     console.log("[api] Generating news content with XAI...")
 
