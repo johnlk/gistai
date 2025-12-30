@@ -56,7 +56,46 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
     },
   })
 
-  const headlines: Headline[] = JSON.parse(headlinesText)
+  // Parse and validate headlines with error handling
+  let headlines: Headline[]
+  try {
+    const parsed = JSON.parse(headlinesText)
+
+    // Validate it's an array
+    if (!Array.isArray(parsed)) {
+      throw new Error("Response is not an array")
+    }
+
+    // Validate each headline has required fields
+    headlines = parsed.map((item, index) => {
+      if (!item || typeof item !== "object") {
+        throw new Error(`Item at index ${index} is not an object`)
+      }
+      if (!item.id || typeof item.id !== "string") {
+        throw new Error(`Item at index ${index} missing valid 'id' field`)
+      }
+      if (!item.title || typeof item.title !== "string") {
+        throw new Error(`Item at index ${index} missing valid 'title' field`)
+      }
+      if (!item.category || typeof item.category !== "string") {
+        throw new Error(`Item at index ${index} missing valid 'category' field`)
+      }
+
+      return {
+        id: item.id,
+        title: item.title,
+        category: item.category,
+        publishedAt: item.publishedAt || new Date().toISOString(),
+      }
+    })
+  } catch (error) {
+    console.error("[xai] Failed to parse headlines:", error)
+    console.error("[xai] Raw response:", headlinesText)
+    throw new Error(
+      `Failed to parse headlines from AI response: ${error instanceof Error ? error.message : "Unknown error"}`
+    )
+  }
+
   console.log(`[xai] Generated ${headlines.length} headlines`)
 
   // Generate articles for each headline in parallel
