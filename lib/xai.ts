@@ -59,10 +59,12 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
   const headlines: Headline[] = JSON.parse(headlinesText)
   console.log(`[xai] Generated ${headlines.length} headlines`)
 
-  // Generate articles for each headline
-  const articles: Record<string, Article> = {}
+  // Generate articles for each headline in parallel
+  console.log(`[xai] Generating ${headlines.length} articles in parallel...`)
 
-  for (const headline of headlines) {
+  const publishedAt = new Date().toISOString()
+
+  const articlePromises = headlines.map(async (headline) => {
     console.log(`[xai] Generating article for: ${headline.title}`)
 
     const { text: articleContent } = await generateText({
@@ -82,12 +84,22 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
       },
     })
 
-    headline.publishedAt = new Date().toISOString()
+    headline.publishedAt = publishedAt
 
-    articles[headline.id] = {
-      ...headline,
-      content: articleContent.trim(),
+    return {
+      id: headline.id,
+      article: {
+        ...headline,
+        content: articleContent.trim(),
+      },
     }
+  })
+
+  const articleResults = await Promise.all(articlePromises)
+
+  const articles: Record<string, Article> = {}
+  for (const { id, article } of articleResults) {
+    articles[id] = article
   }
 
   console.log(`[xai] Successfully generated ${Object.keys(articles).length} articles`)

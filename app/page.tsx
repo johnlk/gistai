@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { getHeadlines } from "@/lib/news"
+import { LocalTime } from "@/components/local-time"
 
 export const revalidate = 3600 // Revalidate every hour
 
@@ -19,13 +20,7 @@ export default async function HomePage() {
             AI news to get the gist. All articles are &lt; 800 words (2 min reads). Created by John Kuhn.
           </p>
           <p className="text-center text-xs text-muted-foreground/70">
-            Updated{" "}
-            {new Date(lastUpdated).toLocaleString("en-US", {
-              month: "short",
-              day: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-            })}
+            Updated <LocalTime isoString={lastUpdated} />
           </p>
         </div>
       </header>
