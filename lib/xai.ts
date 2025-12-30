@@ -35,7 +35,7 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
   // Generate 10 headlines
   const { text: headlinesText } = await generateText({
     model: xai(MODEL_NAME),
-    prompt: `Generate 10 news headlines with categories from today's breaking news.
+    prompt: `Using the internet, find 10 news headlines with categories from today's breaking news.
     Include a mix of politics, technology, world events, business, and culture.
     Format as a JSON array with this exact structure:
     [
@@ -46,6 +46,14 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
       }
     ]
     Make them compelling and newsworthy. Return ONLY the JSON array, no other text.`,
+    providerOptions: {
+      xai: {
+        searchParameters: {
+          mode: "on",
+          returnCitations: true,
+        },
+      },
+    },
   })
 
   const headlines: Headline[] = JSON.parse(headlinesText)
@@ -59,11 +67,19 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
 
     const { text: articleContent } = await generateText({
       model: xai(MODEL_NAME),
-      prompt: `Write a concise news article about: "${headline.title}"
+      prompt: `Using the internet for information, write a concise news article about: "${headline.title}"
 
       Write in a professional journalistic style. Include key facts and context.
       Each paragraph should be 3-4 sentences. Return only the article text, no title or extra formatting.
       Max 800 words.`,
+      providerOptions: {
+        xai: {
+          searchParameters: {
+            mode: "on",
+            returnCitations: true,
+          },
+        },
+      },
     })
 
     headline.publishedAt = new Date().toISOString()
