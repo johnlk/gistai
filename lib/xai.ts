@@ -36,7 +36,8 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
   const { text: headlinesText } = await generateText({
     model: xai(MODEL_NAME),
     prompt: `Using the internet, find 10 news headlines with categories from today's breaking news.
-    Include a mix of politics, technology, world events, business, and culture.
+    Focus on the US primarily, tech news, funding announcements. I'm interested in biotech, healthcare, AI, and pre-clinical.
+    The story should be from the last 3 days at least. Order from most important or significant to least.
     Format as a JSON array with this exact structure:
     [
       {
@@ -110,9 +111,8 @@ export async function generateNewsWithXAI(): Promise<GeneratedNews> {
       model: xai(MODEL_NAME),
       prompt: `Using the internet for information, write a concise news article about: "${headline.title}"
 
-      Write in a professional journalistic style. Include key facts and context.
-      Each paragraph should be 3-4 sentences. Return only the article text, no title or extra formatting.
-      Max 800 words.`,
+      Write in a provocative fun tone that is memorable and entertaining. At the top of the article, share 3 bullet points
+      with the key takeaways. Return only the article text, no title or extra formatting. Max 800 words.`,
       providerOptions: {
         xai: {
           searchParameters: {

@@ -25,6 +25,30 @@ export default async function ArticlePage({
     notFound()
   }
 
+  const parseMarkdown = (text: string) => {
+    const parts = []
+    let lastIndex = 0
+    const regex = /\*\*(.*?)\*\*/g
+    let match
+    
+    while ((match = regex.exec(text)) !== null) {
+      // Add text before the bold
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index))
+      }
+      // Add bold text
+      parts.push(<strong key={match.index}>{match[1]}</strong>)
+      lastIndex = regex.lastIndex
+    }
+    
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex))
+    }
+    
+    return parts.length > 0 ? parts : text
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-gradient-to-b from-muted/30 to-background">
@@ -66,11 +90,30 @@ export default async function ArticlePage({
           </div>
 
           <div className="prose prose-lg prose-neutral dark:prose-invert max-w-none">
-            {article.content.split("\n\n").map((paragraph, index) => (
-              <p key={index} className="mb-6 leading-relaxed text-foreground/90">
-                {paragraph}
-              </p>
-            ))}
+            {article.content.split("\n\n").map((paragraph, index) => {
+              // Check if this section contains bullet points
+              if (paragraph.trim().startsWith('-')) {
+                return (
+                  <ul key={index} className="mb-6 space-y-3 list-disc pl-6">
+                    {paragraph.split('\n').filter(line => line.trim()).map((bullet, bulletIndex) => {
+                      const text = bullet.replace(/^-\s*/, '').trim()
+                      return (
+                        <li key={bulletIndex} className="leading-relaxed text-foreground/90">
+                          {parseMarkdown(text)}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )
+              }
+              
+              // Regular paragraph
+              return (
+                <p key={index} className="mb-6 leading-relaxed text-foreground/90">
+                  {parseMarkdown(paragraph)}
+                </p>
+              )
+            })}
           </div>
         </article>
       </main>
